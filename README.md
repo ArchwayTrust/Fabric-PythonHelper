@@ -13,5 +13,13 @@ Documentation to follow!
 ### GraphAPI_Emails
 
 ## Building a Wheel File
-- `pip install wheel setuptools`
-- `python setup.py sdist bdist_wheel`
+In order to build I had to add to create a pip.ini file in `C:\ProgramData\pip\`
+<br>
+Which contained:
+```
+[global]
+trusted-host = files.pythonhosted.org
+```
+You can then build with:
+- `pip install build`
+- `python -m build`

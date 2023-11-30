@@ -5,12 +5,12 @@ setup(
     version='0.1',
     packages=find_packages(),
     install_requires=[
-        msal,
-        requests,
-        json,
-        base64,
-        time,
-        logging
+        "msal",
+        "requests",
+        "json",
+        "base64",
+        "time",
+        "logging"
     ],
     author='Ben Dobbs',
     author_email='bdobbs@archwaytrust.co.uk',
