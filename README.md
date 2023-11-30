@@ -11,3 +11,7 @@ Documentation to follow!
 
 ## GraphAPI
 ### GraphAPI_Emails
+
+## Building a Wheel File
+- `pip install wheel setuptools`
+- `python setup.py sdist bdist_wheel`
