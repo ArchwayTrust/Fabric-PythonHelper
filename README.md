@@ -19,6 +19,7 @@ Which contained:
 ```
 [global]
 trusted-host = files.pythonhosted.org
+               pypi.org
 ```
 You can then build with:
 - `pip install build`
