@@ -4,7 +4,7 @@ import json
 import base64
 import time
 
-class GraphAPI_Emails:
+class Email:
     """
     A class to interact with Microsoft Graph API for managing emails.
 
