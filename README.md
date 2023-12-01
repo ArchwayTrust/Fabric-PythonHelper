@@ -65,12 +65,39 @@ email_account.get_initial_tokens()
 
 It will give you a link and device code which you need to follow and authenticate with.
 
+- Find the message id (currently returns first:)
+```
+message_id = email_account.search_message_by_subject_and_sender("Attachment Test", "bdobbs@archwaytrust.co.uk")
+```
+
+- Get list of attachment ids:
+```
+attachments = email_account.get_attachment_ids_and_names(message_id)
+```
+
+- Get attachments:
+(You can loop through the list of attachments if required)
+```
+attachment = email_account.download_attachment(message_id = message_id, attachment_id = attachments[0][0], is_binary=True, encoding="utf-8")
+```
+
+- Save to onelake:
+Assuming it's a text file - you're here because you're grabbing a csv from an email you can just use 
 
 ```
-user_id = "cdad..."
-
-message_id = email_account.search_message_by_subject(user_id, "Email Title", "sender@archwaytrust.co.uk")
+mssparkutils.fs.put(file_path, text_data, overwrite=True)
 ```
+If you returned a binary other methods would be required.
+
+- Delete the email:
+
+```
+email_account.delete_email(message_id)
+```
+
+
+
+
 
 ## Building a Wheel File
 In order to build I had to add to create a pip.ini file in `C:\ProgramData\pip\`
