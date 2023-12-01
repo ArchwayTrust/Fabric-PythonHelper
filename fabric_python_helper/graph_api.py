@@ -3,6 +3,7 @@ import requests
 import json
 import base64
 import time
+from notebookutils import mssparkutils
 
 class Email:
     """

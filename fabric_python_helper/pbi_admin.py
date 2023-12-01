@@ -3,6 +3,7 @@ import logging
 import requests
 import json
 import time
+from notebookutils import mssparkutils
 
 class GetAccessToken:
     def __init__(self):
