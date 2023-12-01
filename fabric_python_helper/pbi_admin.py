@@ -5,7 +5,7 @@ import json
 import time
 from notebookutils import mssparkutils
 
-class Access:
+class AccessTokens:
     def __init__(self):
         # Setting up a logger for this class
         self.logger = logging.getLogger(__name__)
