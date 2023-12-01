@@ -8,6 +8,7 @@ from notebookutils import mssparkutils
 class Emails:
     """
     A class to interact with Microsoft Graph API for managing emails.
+    Requires an app registration with delegated User.Read, Mail.ReadWrite, offline_access and public client flow enabled.
 
     Attributes:
         tennant_id (str): Tenant ID for Azure authentication.
@@ -43,6 +44,7 @@ class Emails:
             authority=f"https://login.microsoftonline.com/{self.tennant_id}"
         )
 
+        print("Attempting to authenticate and renew the refresh token:")
         try:
             # Get latest refresh token
             self.refresh_token = mssparkutils.credentials.getSecret(self.akv_url, self.refresh_secret_name)
@@ -52,6 +54,12 @@ class Emails:
             self.access_token = response["access_token"]
             self.new_refresh_token = response["refresh_token"]
             self._store_refresh_token(self.new_refresh_token)
+
+            self.user = self.get_user()
+            self.user_principal_name = self.user.get("userPrincipalName")
+            self.user_id = self.user.get("id")
+            print(f"You are authenticated as {self.user_principal_name} ({self.user_id}).")
+
         except Exception as e:
             self.access_token = None
             self.new_refresh_token = None
@@ -129,7 +137,7 @@ class Emails:
             # Handle authentication failure
             print(f"Authentication failed. Result was: {result}")
 
-    def search_message_by_subject(self, user_id, subject, sender_email):
+    def search_message_by_subject_and_sender(self, subject, sender_email):
         """
         Searches for an email by its subject and sender's email using Microsoft Graph API.
 
@@ -138,7 +146,6 @@ class Emails:
         matching email if found.
 
         Parameters:
-            user_id (str): The ID of the user whose mailbox is being searched.
             subject (str): The subject of the email to search for.
             sender_email (str): The email address of the sender of the email.
 
@@ -149,7 +156,7 @@ class Emails:
         headers = {'Authorization': f'Bearer {self.access_token}'}
 
         # The endpoint URL for Microsoft Graph API to access user's messages
-        endpoint = f'https://graph.microsoft.com/v1.0/users/{user_id}/messages'
+        endpoint = f'https://graph.microsoft.com/v1.0/users/me/messages'
 
         # Setting query parameters for filtering by subject and sender's email
         query_parameters = {
@@ -215,7 +222,7 @@ class Emails:
 
         return attachments_info
     
-    def download_attachment(self, user_id, message_id, attachment_id, is_binary=False, encoding='utf-8'):
+    def download_attachment(self, message_id, attachment_id, is_binary=False, encoding='utf-8'):
         """
         Downloads an attachment from an email using the Microsoft Graph API.
 
@@ -223,7 +230,6 @@ class Emails:
         binary files (like images or PDFs) and text-based files (like CSV or TXT).
 
         Parameters:
-            user_id (str): The ID of the user who owns the message.
             message_id (str): The ID of the message from which the attachment is to be downloaded.
             attachment_id (str): The ID of the attachment to be downloaded.
             is_binary (bool): Flag indicating whether the attachment is a binary file. Default is False.
@@ -236,7 +242,7 @@ class Emails:
         headers = {'Authorization': f'Bearer {self.access_token}'}
 
         # Constructing the URL to access the attachment via Microsoft Graph API
-        attachment_url = f'https://graph.microsoft.com/v1.0/users/{user_id}/messages/{message_id}/attachments/{attachment_id}'
+        attachment_url = f'https://graph.microsoft.com/v1.0/users/me/messages/{message_id}/attachments/{attachment_id}'
 
         # Making a GET request to fetch the attachment
         attachment_response = requests.get(attachment_url, headers=headers)
@@ -248,7 +254,7 @@ class Emails:
         # Returning the attachment content based on its type
         return attachment_content if is_binary else attachment_content.decode(encoding)
 
-    def delete_email(self, user_id, message_id):
+    def delete_email(self, message_id):
         """
         Deletes an email using the Microsoft Graph API.
 
@@ -257,7 +263,6 @@ class Emails:
         ID to identify the specific email to be deleted.
 
         Parameters:
-            user_id (str): The ID of the user who owns the message.
             message_id (str): The ID of the message to be deleted.
 
         Returns:
@@ -265,7 +270,7 @@ class Emails:
         """
 
         # Constructing the URL for the Microsoft Graph API delete message endpoint
-        delete_url = f'https://graph.microsoft.com/v1.0/users/{user_id}/messages/{message_id}'
+        delete_url = f'https://graph.microsoft.com/v1.0/users/me/messages/{message_id}'
 
         # Setting up the authorization header with the access token
         headers = {
@@ -278,5 +283,32 @@ class Emails:
 
         # Checking if the status code indicates success (204 No Content)
         return response.status_code == 204
+    
+    def get_user(self):
+        """
+        Gets the user id of the currently authenticated user using the Microsoft Graph API.
+
+        Returns:
+            json: user_data
+
+        To access items in the json use user_data.get('id')
+        """
+
+        # Constructing the URL for the Microsoft Graph API me endpoint
+        me_url = "https://graph.microsoft.com/v1.0/me"
+
+        # Setting up the authorization header with the access token
+        headers = {
+            'Authorization': f'Bearer {self.access_token}',
+            'Content-Type': 'application/json'
+        }
+
+        # GET Response from endpoint.
+        response = requests.get(me_url, headers=headers)
+
+    # Extract user data
+        user_data = response.json()
+
+        return user_data
 
     
