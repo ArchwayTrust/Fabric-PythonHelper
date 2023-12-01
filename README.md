@@ -56,7 +56,7 @@ refresh_secret_name = "Secret Name"
 email_account = gr.Emails(tennant_id, client_id, akv_url, refresh_secret_name)
 
 ```
-
+- Initial Authentication
 On first run you will need to authenticate, this is using device flow authentication:
 
 ```
@@ -65,7 +65,7 @@ email_account.get_initial_tokens()
 
 It will give you a link and device code which you need to follow and authenticate with.
 
-- Find the message id (currently returns first:)
+- Find the message id (currently returns first email only)
 ```
 message_id = email_account.search_message_by_subject_and_sender("Attachment Test", "bdobbs@archwaytrust.co.uk")
 ```
@@ -85,7 +85,7 @@ attachment = email_account.download_attachment(message_id = message_id, attachme
 Assuming it's a text file - you're here because you're grabbing a csv from an email you can just use 
 
 ```
-mssparkutils.fs.put(file_path, text_data, overwrite=True)
+mssparkutils.fs.put(file_path, attachment, overwrite=True)
 ```
 If you returned a binary other methods would be required.
 
