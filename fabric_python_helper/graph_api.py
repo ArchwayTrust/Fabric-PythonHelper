@@ -156,7 +156,7 @@ class Emails:
         headers = {'Authorization': f'Bearer {self.access_token}'}
 
         # The endpoint URL for Microsoft Graph API to access user's messages
-        endpoint = f'https://graph.microsoft.com/v1.0/users/me/messages'
+        endpoint = f'https://graph.microsoft.com/v1.0/users/{self.user_id}/messages'
 
         # Setting query parameters for filtering by subject and sender's email
         query_parameters = {
@@ -192,7 +192,7 @@ class Emails:
             list of tuple: A list of tuples, where each tuple contains the ID and name of an attachment.
         """
         # Constructing the URL for the Microsoft Graph API attachments endpoint
-        url = f'https://graph.microsoft.com/v1.0/me/messages/{message_id}/attachments'
+        url = f'https://graph.microsoft.com/v1.0/{self.user_id}/messages/{message_id}/attachments'
 
         # Setting up the authorization header with the access token
         headers = {
@@ -242,14 +242,14 @@ class Emails:
         headers = {'Authorization': f'Bearer {self.access_token}'}
 
         # Constructing the URL to access the attachment via Microsoft Graph API
-        attachment_url = f'https://graph.microsoft.com/v1.0/users/me/messages/{message_id}/attachments/{attachment_id}'
+        attachment_url = f'https://graph.microsoft.com/v1.0/users/{self.user_id}/messages/{message_id}/attachments/{attachment_id}'
 
         # Making a GET request to fetch the attachment
         attachment_response = requests.get(attachment_url, headers=headers)
 
         # Extracting the attachment content from the response
         attachment = attachment_response.json()
-        attachment_content = base64.b64decode(attachment['contentBytes'])
+        attachment_content = base64.b64decode(attachment["contentBytes"])
 
         # Returning the attachment content based on its type
         return attachment_content if is_binary else attachment_content.decode(encoding)
@@ -270,7 +270,7 @@ class Emails:
         """
 
         # Constructing the URL for the Microsoft Graph API delete message endpoint
-        delete_url = f'https://graph.microsoft.com/v1.0/users/me/messages/{message_id}'
+        delete_url = f'https://graph.microsoft.com/v1.0/users/{self.user_id}/messages/{message_id}'
 
         # Setting up the authorization header with the access token
         headers = {
