@@ -18,19 +18,22 @@ access_token = pbi.AccessTokens().get_token_as_fabric_notebook_owner()
 ### Dataflows
 
 ```
-workspace_id = "7509f3..."
-dataflow_id = "46aed99..."
+access_token = pbi.AccessTokens().get_token_as_fabric_notebook_owner()
+workspace_id = "7509f..."
+dataflow_id = "46aed9..."
 
 dataflow = pbi.Dataflows(workspace_id, dataflow_id, access_token)
-dataflow.refresh_dataflow(expected_duration=60, loop_interval=20)
+dataflow.refresh_dataflow(expected_duration=60, loop_interval=20, wait_for_completion=True)
 ```
 
 
 ### Semantic Models
 ```
-dataset_id = "84324..."
+access_token = pbi.AccessTokens().get_token_as_fabric_notebook_owner()
+semantic_model_id = "d0c24..."
 
-semantic_model = pbi.SemanticModels(dataset_id, access_token)
+semantic_model = pbi.SemanticModels(semantic_model_id, access_token)
+semantic_model.refresh_semantic_model(expected_duration=60, loop_interval=20, wait_for_completion=True)
 ```
 
 

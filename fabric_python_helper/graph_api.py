@@ -51,14 +51,14 @@ class Emails:
             response = self.app.acquire_token_by_refresh_token(self.refresh_token, self.SCOPES)
             self.access_token = response["access_token"]
             self.new_refresh_token = response["refresh_token"]
-            self.store_refresh_token(self.new_refresh_token)
+            self._store_refresh_token(self.new_refresh_token)
         except Exception as e:
             self.access_token = None
             self.new_refresh_token = None
             print("Couldn't get access token. Try running get_initial_tokens")
             print(f"Error: {e}")
     
-    def store_refresh_token(self, refresh_token):
+    def _store_refresh_token(self, refresh_token):
         """
         Stores the given refresh token in the Azure Key Vault.
 
@@ -124,7 +124,7 @@ class Emails:
             self.access_token = result['access_token']
             self.refresh_token = result['refresh_token']
             # Store the new refresh token in the key vault
-            self.store_refresh_token(result['refresh_token'])
+            self._store_refresh_token(result['refresh_token'])
         else:
             # Handle authentication failure
             print(f"Authentication failed. Result was: {result}")
