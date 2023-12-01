@@ -137,7 +137,7 @@ class Dataflows:
             str: The result of the refresh request handling.
         """
         if response.ok:
-            print("Refresh requested successfully. Waiting for expected duration...")
+            print("Refresh requested successfully.")
             return "Refresh started"
         elif response.status_code == 404:
             error_message = "Resource Not Found. Check the WorkspaceId and DataflowId."
@@ -167,7 +167,7 @@ class Dataflows:
         response = requests.get(transaction_endpoint, headers=headers)
         response.raise_for_status()
         
-        return response.json()
+        return response
 
     def _handle_transaction_response(self, response):
         """
@@ -210,8 +210,10 @@ class Dataflows:
             
             # If not waiting for completion, return the initial result
             if not wait_for_completion:
+                print("Refresh has started but completion won't be checked.")
                 return result
             
+            print("Waiting for expected duration...")
             # Wait for the expected duration before checking the status
             time.sleep(expected_duration)
             
@@ -281,7 +283,7 @@ class SemanticModels:
             str: The result of handling the refresh request.
         """
         if response.ok:
-            print("Refresh requested successfully. Waiting for expected duration...")
+            print("Refresh requested successfully.")
             return "Refresh started"
         elif response.status_code == 404:
             error_message = "Resource Not Found. Check the Semantic Model ID."
@@ -311,7 +313,7 @@ class SemanticModels:
         response = requests.get(refresh_endpoint, headers=headers)
         response.raise_for_status()
         
-        return response.json()
+        return response
 
     def _handle_refresh_status_response(self, response):
         """
@@ -354,8 +356,9 @@ class SemanticModels:
             
             # If not waiting for completion, return the initial result
             if not wait_for_completion:
+                print("Refresh has started but completion won't be checked.")
                 return result
-            
+            print("Waiting for expected duration...")
             # Wait for the expected duration before checking the status
             time.sleep(expected_duration)
             
