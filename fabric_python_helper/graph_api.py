@@ -63,7 +63,7 @@ class Emails:
         except Exception as e:
             self.access_token = None
             self.new_refresh_token = None
-            print("Couldn't get access token. Try running get_initial_tokens")
+            print("Couldn't get access token. Try running get_initial_tokens()")
             print(f"Error: {e}")
     
     def _store_refresh_token(self, refresh_token):

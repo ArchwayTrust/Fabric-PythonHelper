@@ -57,6 +57,15 @@ email_account = gr.Emails(tennant_id, client_id, akv_url, refresh_secret_name)
 
 ```
 
+On first run you will need to authenticate, this is using device flow authentication:
+
+```
+email_account.get_initial_tokens()
+```
+
+It will give you a link and device code which you need to follow and authenticate with.
+
+
 ```
 user_id = "cdad..."
 
