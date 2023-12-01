@@ -5,7 +5,7 @@ import base64
 import time
 from notebookutils import mssparkutils
 
-class Email:
+class Emails:
     """
     A class to interact with Microsoft Graph API for managing emails.
 

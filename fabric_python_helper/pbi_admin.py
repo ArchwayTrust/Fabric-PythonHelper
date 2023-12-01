@@ -5,12 +5,12 @@ import json
 import time
 from notebookutils import mssparkutils
 
-class GetAccessToken:
+class Access:
     def __init__(self):
         # Setting up a logger for this class
         self.logger = logging.getLogger(__name__)
 
-    def as_service_principal(self, tenant_id, client_id, akv_url, akv_secret_name):
+    def get_token_as_service_principal(self, tenant_id, client_id, akv_url, akv_secret_name):
         """
         Authenticates as a service principal using client credentials.
 
@@ -63,7 +63,7 @@ class GetAccessToken:
             self.logger.error(f"Error in as_service_principal: {str(e)}")
             raise
 
-    def as_fabric_notebook_owner(self):
+    def get_token_as_fabric_notebook_owner(self):
         """
         Retrieves an access token as the notebook owner in Fabric.
 
@@ -85,7 +85,7 @@ class GetAccessToken:
             self.logger.error(f"Error in as_fabric_notebook_owner: {str(e)}")
             raise
 
-class RefreshDataflow:
+class Dataflows:
     # Base URL for Power BI API calls
     BASE_URL = "https://api.powerbi.com/v1.0/myorg/groups/"
 
@@ -231,7 +231,7 @@ class RefreshDataflow:
         except Exception as e:
             return str(e)
 
-class RefreshSemanticModel:
+class SemanticModels:
     # Base URL for Power BI API calls
     BASE_URL = "https://api.powerbi.com/v1.0/myorg/datasets/"
 
