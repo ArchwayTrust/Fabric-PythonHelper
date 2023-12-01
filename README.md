@@ -9,10 +9,10 @@ from fabric_python_helper import pbi_admin as pbi
 ```
 
 
-### Access
+### Access Tokens
 Can be initiated directly:
 ```
-access_token = pbi.Access().get_token_as_fabric_notebook_owner()
+access_token = pbi.AccessTokens().get_token_as_fabric_notebook_owner()
 ```
 
 ### Dataflows
@@ -26,7 +26,7 @@ dataflow.refresh_dataflow(expected_duration=60, loop_interval=20)
 ```
 
 
-### SemanticModels
+### Semantic Models
 ```
 dataset_id = "84324..."
 
