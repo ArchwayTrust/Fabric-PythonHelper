@@ -42,7 +42,19 @@ from fabric_python_helper import graph_api as gr
 ### Emails
 
 ```
+tennant_id = "23...."
+client_id = "00df..."
+akv_url = "https://name.vault.azure.net/"
+refresh_secret_name = "Secret Name"
+
 email_account = gr.Emails(tennant_id, client_id, akv_url, refresh_secret_name)
+
+```
+
+```
+user_id = "cdad..."
+
+message_id = email_account.search_message_by_subject(user_id, "Email Title", "sender@archwaytrust.co.uk")
 ```
 
 ## Building a Wheel File
