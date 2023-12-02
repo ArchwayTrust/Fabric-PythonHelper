@@ -47,15 +47,14 @@ class Emails:
         try:
             # Get latest refresh token
             self.refresh_token = mssparkutils.credentials.getSecret(self.akv_url, self.refresh_secret_name)
-            print("Success")
+            print("Success!")
         except Exception as e:
             self.access_token = None
             print("Couldn't retrieve secret from key vault.")
-            print(f"Error: {e}")
             print("Ensure that the notebook user has permissions on the key vault. Then try running get_initial_tokens()")
-            return
+            raise Exception(f"Issue retrieving secret from key vault. Error: {e}") from None
 
-        print("Using stored refresh token to acquire access token:")
+        print("Using stored refresh token to acquire access token and get user details:")
         try:
             # Get access token <and a new refresh token.>
             response = self.app.acquire_token_by_refresh_token(self.refresh_token, self.SCOPES)
@@ -68,7 +67,7 @@ class Emails:
         except Exception as e:
             self.access_token = None
             print("Couldn't get access token. Try running get_initial_tokens()")
-            print(f"Error: {e}")
+            raise Exception(f"Couldn't get access token. Error: {e}") from None
     
     def _store_refresh_token(self, refresh_token):
         """
@@ -103,6 +102,7 @@ class Emails:
             print("Failed to update secret.")
             print("Status code:", response.status_code)
             print("Response:", response.text)
+            raise Exception(f"Failed to update Secret. Code: {response.status_code}, Text: {response.text}")
 
 
     def get_initial_tokens(self):
@@ -118,7 +118,7 @@ class Emails:
 
         # Check if the user_code is part of the flow response
         if "user_code" not in flow:
-            raise ValueError(f"Fail to create device flow. Err: {json.dumps(flow, indent=4)}")
+            raise ValueError(f"Failed to create device flow. Err: {json.dumps(flow, indent=4)}")
 
         # Set an expiration time for the flow (60 seconds from now)
         flow['expires_at'] = int(time.time()) + 60
@@ -140,6 +140,7 @@ class Emails:
         else:
             # Handle authentication failure
             print(f"Authentication failed. Result was: {result}")
+            raise Exception(f"Authentication failed. Error: {result}")
 
     def search_message_by_subject_and_sender(self, subject, sender_email):
         """
@@ -248,8 +249,9 @@ class Emails:
         # Constructing the URL to access the attachment via Microsoft Graph API
         attachment_url = f'https://graph.microsoft.com/v1.0/users/{self.user_id}/messages/{message_id}/attachments/{attachment_id}'
 
-        # Making a GET request to fetch the attachment
+        # Making a GET request to fetch the attachment anf check success
         attachment_response = requests.get(attachment_url, headers=headers)
+        attachment_response.raise_for_status()
 
         # Extracting the attachment content from the response
         attachment = attachment_response.json()
@@ -309,6 +311,7 @@ class Emails:
 
         # GET Response from endpoint.
         response = requests.get(me_url, headers=headers)
+        response.raise_for_status()
 
     # Extract user data
         user_data = response.json()
