@@ -1,6 +1,5 @@
-# Fabric-PythonHelper
+# Fabric Python Helper
 Collection of useful python code for automation in Microsoft Fabric.
-Documentation to follow!
 
 ## PBI Admin
 In Fabric notebook run:
