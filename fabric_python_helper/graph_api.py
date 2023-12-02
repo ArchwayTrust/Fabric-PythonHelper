@@ -20,7 +20,7 @@ class Emails:
     """
 
     REDIRECT_URI = "https://login.microsoftonline.com/common/oauth2/nativeclient"
-    SCOPES = ["User.Read", "Mail.ReadWrite"]
+    SCOPES = ["User.Read", "Mail.ReadWrite", "Mail.Send"]
 
     def __init__(self, tennant_id, client_id, akv_url, refresh_secret_name):
         """
