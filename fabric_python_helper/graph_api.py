@@ -17,7 +17,6 @@ class Emails:
         refresh_secret_name (str): Name of the secret in the Azure Key Vault that holds the refresh token.
         app (msal.PublicClientApplication): MSAL instance for Azure authentication.
         access_token (str): Token for authenticated access to the Graph API.
-        new_refresh_token (str): New refresh token received after successful authentication.
     """
 
     REDIRECT_URI = "https://login.microsoftonline.com/common/oauth2/nativeclient"
@@ -44,17 +43,23 @@ class Emails:
             authority=f"https://login.microsoftonline.com/{self.tennant_id}"
         )
 
-        print("Attempting to authenticate and renew the refresh token:")
+        print("Retrieving refresh token from Azure Key Vault:")
         try:
             # Get latest refresh token
             self.refresh_token = mssparkutils.credentials.getSecret(self.akv_url, self.refresh_secret_name)
+            print("Success")
+        except Exception as e:
+            self.access_token = None
+            print("Couldn't retrieve secret from key vault.")
+            print(f"Error: {e}")
+            print("Ensure that the notebook user has permissions on the key vault. Then try running get_initial_tokens()")
+            return
 
-            # Get access token and a new refresh token.
+        print("Using stored refresh token to acquire access token:")
+        try:
+            # Get access token <and a new refresh token.>
             response = self.app.acquire_token_by_refresh_token(self.refresh_token, self.SCOPES)
             self.access_token = response["access_token"]
-            self.new_refresh_token = response["refresh_token"]
-            self._store_refresh_token(self.new_refresh_token)
-
             self.user = self.get_user()
             self.user_principal_name = self.user.get("userPrincipalName")
             self.user_id = self.user.get("id")
@@ -62,7 +67,6 @@ class Emails:
 
         except Exception as e:
             self.access_token = None
-            self.new_refresh_token = None
             print("Couldn't get access token. Try running get_initial_tokens()")
             print(f"Error: {e}")
     
