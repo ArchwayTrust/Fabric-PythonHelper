@@ -84,7 +84,7 @@ attachments = email_account.get_attachment_ids_and_names(message_id)
 #### Get attachments:
 (You can loop through the list of attachments if required)
 ```
-attachment = email_account.download_attachment(message_id = message_id, attachment_id = attachments[0][0], is_binary=True, encoding="utf-8")
+attachment = email_account.download_attachment(message_id = message_id, attachment_id = attachments[0][0], is_binary=False, encoding="utf-8")
 ```
 
 #### Save to onelake:
