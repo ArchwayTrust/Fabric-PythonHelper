@@ -44,6 +44,8 @@ class Emails:
         )
 
         self.access_token = None
+        print("If you have previously authenticated run connect().")
+        print("If you need to trigger a device authenication flow run get_initial_tokens().")
    
     def connect(self):
         print("Retrieving refresh token from Azure Key Vault:")
