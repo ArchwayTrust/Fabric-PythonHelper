@@ -56,7 +56,7 @@ class Emails:
 
         print("Using stored refresh token to acquire access token and get user details:")
         try:
-            # Get access token <and a new refresh token.>
+            # Get access token.
             response = self.app.acquire_token_by_refresh_token(self.refresh_token, self.SCOPES)
             self.access_token = response["access_token"]
             self.user = self.get_user()
