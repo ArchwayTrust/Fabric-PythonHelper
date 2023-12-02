@@ -43,6 +43,9 @@ class Emails:
             authority=f"https://login.microsoftonline.com/{self.tennant_id}"
         )
 
+        self.access_token = None
+   
+    def connect(self):
         print("Retrieving refresh token from Azure Key Vault:")
         try:
             # Get latest refresh token
@@ -68,7 +71,7 @@ class Emails:
             self.access_token = None
             print("Couldn't get access token. Try running get_initial_tokens()")
             raise Exception(f"Couldn't get access token. Error: {e}") from None
-    
+
     def _store_refresh_token(self, refresh_token):
         """
         Stores the given refresh token in the Azure Key Vault.
