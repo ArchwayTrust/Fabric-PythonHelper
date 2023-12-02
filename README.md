@@ -45,7 +45,7 @@ In Fabric notebook run:
 from fabric_python_helper import graph_api as gr
 ```
 ### Emails
-
+Create an instance for an email account:
 ```
 tennant_id = "23...."
 client_id = "00df..."
@@ -64,6 +64,12 @@ email_account.get_initial_tokens()
 ```
 
 It will give you a link and device code which you need to follow and authenticate with.
+
+#### Connect to Graph API
+```
+email_account.connect()
+```
+
 
 #### Find the message id (currently returns first email only)
 ```
