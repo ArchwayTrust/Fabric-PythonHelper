@@ -56,7 +56,8 @@ refresh_secret_name = "Secret Name"
 email_account = gr.Emails(tennant_id, client_id, akv_url, refresh_secret_name)
 
 ```
-- Initial Authentication
+#### Initial Authentication
+
 On first run you will need to authenticate, this is using device flow authentication:
 
 ```
@@ -65,39 +66,53 @@ email_account.get_initial_tokens()
 
 It will give you a link and device code which you need to follow and authenticate with.
 
-- Find the message id (currently returns first email only)
+#### Find the message id (currently returns first email only)
 ```
-message_id = email_account.search_message_by_subject_and_sender("Attachment Test", "bdobbs@archwaytrust.co.uk")
+message_id = email_account.search_message_by_subject_and_sender("Attachment Test", "email@address.com")
 ```
 
-- Get list of attachment ids:
+#### Get list of attachment ids:
 ```
 attachments = email_account.get_attachment_ids_and_names(message_id)
 ```
 
-- Get attachments:
+#### Get attachments:
 (You can loop through the list of attachments if required)
 ```
 attachment = email_account.download_attachment(message_id = message_id, attachment_id = attachments[0][0], is_binary=True, encoding="utf-8")
 ```
 
-- Save to onelake:
-Assuming it's a text file - you're here because you're grabbing a csv from an email you can just use 
+#### Save to onelake:
+Assuming it's a text file eg you're here because you're grabbing a csv from an email you can just use 
 
 ```
 mssparkutils.fs.put(file_path, attachment, overwrite=True)
 ```
 If you returned a binary other methods would be required.
 
-- Delete the email:
+#### Delete the email:
 
 ```
 email_account.delete_email(message_id)
 ```
 
+#### Send an email
 
+```
+email_addresses = ["email1@address.co.uk", "email2@address.co.uk"]
 
+subject = "Test Email"
 
+content = """
+Hi,
+I'm the content of the email.
+I'm on my own line.
+
+    From Ben               
+"""
+
+email_account.send_email(subject, content, email_addresses)
+```
 
 ## Building a Wheel File
 In order to build I had to add to create a pip.ini file in `C:\ProgramData\pip\`

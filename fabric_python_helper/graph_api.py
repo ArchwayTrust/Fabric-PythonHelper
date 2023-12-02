@@ -317,5 +317,42 @@ class Emails:
         user_data = response.json()
 
         return user_data
+    
+    def send_email(self, subject, content, email_addresses):
+        """
+        Sends an email using the Microsoft Graph API.
+        :param subject: Email subject.
+        :param content: Email content.
+        :param recipients: A list of recipient email addresses.
+        """
+        url = 'https://graph.microsoft.com/v1.0/me/sendMail'
+        headers = {'Authorization': f'Bearer {self.access_token}', 'Content-Type': 'application/json'}
+
+        # Produce recipients section in correct format.
+        recipients = []
+        for address in email_addresses:
+            recipients.append({"emailAddress": {"address": address}})
+
+        # JSON Representing the email.
+        email = {
+            "message": {
+                "subject": subject,
+                "body": {
+                    "contentType": "Text",
+                    "content": content
+                },
+                "toRecipients": recipients
+            },
+            "saveToSentItems": "true"
+        }
+
+        # Post the email.
+        response = requests.post(url, headers=headers, data=json.dumps(email))
+
+        if response.status_code == 202:
+            print("Email sent successfully!")
+        else:
+            print(f"Failed to send email. Status code: {response.status_code}")
+            raise Exception(f"Failed to send email. Status code: {response.status_code}")
 
     
