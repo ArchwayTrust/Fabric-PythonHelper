@@ -202,7 +202,7 @@ class Emails:
             list of tuple: A list of tuples, where each tuple contains the ID and name of an attachment.
         """
         # Constructing the URL for the Microsoft Graph API attachments endpoint
-        url = f'https://graph.microsoft.com/v1.0/{self.user_id}/messages/{message_id}/attachments'
+        url = f'https://graph.microsoft.com/v1.0/users/{self.user_id}/messages/{message_id}/attachments'
 
         # Setting up the authorization header with the access token
         headers = {
