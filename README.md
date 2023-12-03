@@ -38,7 +38,7 @@ semantic_model.refresh_semantic_model(expected_duration=60, loop_interval=20, wa
 
 ## GraphAPI
 Requires an app registration with delegated User.Read, Mail.ReadWrite, Mail.Send and offline_access scopes. The public client flow must also be enabled.
-Requires an azure key vault with an pre initiated secret (correct value will be written in).
+Requires an azure key vault which the notebook owner has permissions to update and read secrets on.
 
 In Fabric notebook run:
 ```
@@ -69,7 +69,7 @@ It will give you a link and device code which you need to follow and authenticat
 ```
 email_account.connect()
 ```
-
+This retrieves an access token for the current session (lasts an hour) and replaces the refresh token in the key vault. Currently unclear as to whether this resets the expiry period.
 
 #### Find the message id (currently returns first email only)
 ```
