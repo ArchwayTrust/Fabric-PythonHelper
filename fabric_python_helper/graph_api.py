@@ -43,7 +43,10 @@ class Emails:
             authority=f"https://login.microsoftonline.com/{self.tennant_id}"
         )
 
+        self.token_response = None
         self.access_token = None
+        self.refresh_token = None
+
         print("If you have previously authenticated run connect().")
         print("If you need to trigger a device authenication flow run get_initial_tokens().")
    
@@ -54,6 +57,7 @@ class Emails:
             self.refresh_token = mssparkutils.credentials.getSecret(self.akv_url, self.refresh_secret_name)
             print("Success!")
         except Exception as e:
+            self.token_response = None
             self.access_token = None
             print("Couldn't retrieve secret from key vault.")
             print("Ensure that the notebook user has permissions on the key vault. Then try running get_initial_tokens()")
@@ -62,8 +66,10 @@ class Emails:
         print("Using stored refresh token to acquire access token and get user details:")
         try:
             # Get access token.
-            response = self.app.acquire_token_by_refresh_token(self.refresh_token, self.SCOPES)
-            self.access_token = response["access_token"]
+            self.token_response = self.app.acquire_token_by_refresh_token(self.refresh_token, self.SCOPES)
+            self.access_token = self.token_response["access_token"]
+            self.refresh_token = self.token_response["refresh_token"]
+            self._store_refresh_token(self.refresh_token)
             self.user = self.get_user()
             self.user_principal_name = self.user.get("userPrincipalName")
             self.user_id = self.user.get("id")
@@ -102,7 +108,7 @@ class Emails:
 
         # Check the response from the Azure Key Vault
         if response.status_code == 200:
-            print("Secret updated successfully.")
+            print("Refresh secret updated successfully.")
         else:
             print("Failed to update secret.")
             print("Status code:", response.status_code)
@@ -141,7 +147,7 @@ class Emails:
             self.access_token = result['access_token']
             self.refresh_token = result['refresh_token']
             # Store the new refresh token in the key vault
-            self._store_refresh_token(result['refresh_token'])
+            self._store_refresh_token(self.refresh_token)
         else:
             # Handle authentication failure
             print(f"Authentication failed. Result was: {result}")
@@ -359,5 +365,4 @@ class Emails:
         else:
             print(f"Failed to send email. Status code: {response.status_code}")
             raise Exception(f"Failed to send email. Status code: {response.status_code}")
-
     
