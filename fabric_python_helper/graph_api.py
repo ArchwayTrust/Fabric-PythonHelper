@@ -153,7 +153,7 @@ class Emails:
             print(f"Authentication failed. Result was: {result}")
             raise Exception(f"Authentication failed. Error: {result}")
 
-    def search_message_by_subject_and_sender(self, subject, sender_email):
+    def search_message_by_subject_and_sender(self, subject, sender_email, only_search_inbox=True):
         """
         Searches for an email by its subject and sender's email using Microsoft Graph API.
 
@@ -172,7 +172,10 @@ class Emails:
         headers = {'Authorization': f'Bearer {self.access_token}'}
 
         # The endpoint URL for Microsoft Graph API to access user's messages
-        endpoint = f'https://graph.microsoft.com/v1.0/users/{self.user_id}/messages'
+        if only_search_inbox:
+            endpoint = f"https://graph.microsoft.com/v1.0/users/{self.user_id}/mailFolders/Inbox/messages"
+        else:
+            endpoint = f"https://graph.microsoft.com/v1.0/users/{self.user_id}/messages"
 
         # Setting query parameters for filtering by subject and sender's email
         query_parameters = {
