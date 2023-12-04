@@ -271,7 +271,7 @@ class Emails:
         # Returning the attachment content based on its type
         return attachment_content if is_binary else attachment_content.decode(encoding)
 
-    def delete_email(self, message_id):
+    def delete_email(self, message_id, max_retries=4):
         """
         Deletes an email using the Microsoft Graph API.
 
@@ -295,11 +295,29 @@ class Emails:
             'Content-Type': 'application/json'
         }
 
-        # Performing the DELETE request to the Graph API
-        response = requests.delete(delete_url, headers=headers)
+        for attempt in range(max_retries):
+            response = requests.delete(delete_url, headers=headers)
+            message_exists = self._check_if_message_exists(message_id)
+            
+            if not message_exists:
+                print("Email deleted successfully.")
+                return True
+            else:
+                print(f"Attempt {attempt+1} failed. Message still exists.") # range numbers from 0
+                
+                # Exponential backoff but never waits more than 2 minutes.
+                # Depending on retries: 10, 20, 40, 80, 120, 120, 120... 
+                exp_sleep_time = 10 * (2**attempt)
+                if exp_sleep_time > 80:
+                    sleep_time = 120
+                else:
+                    sleep_time = exp_sleep_time
+                print(f"Retrying delete in {sleep_time} seconds.")
+                                
+                time.sleep(sleep_time) 
 
-        # Checking if the status code indicates success (204 No Content)
-        return response.status_code == 204
+        print("Failed to delete email after maximum retries.")
+        return False
     
     def get_user(self):
         """
@@ -365,4 +383,36 @@ class Emails:
         else:
             print(f"Failed to send email. Status code: {response.status_code}")
             raise Exception(f"Failed to send email. Status code: {response.status_code}")
+    
+    def _check_if_message_exists(self, message_id):
+        """
+        Checks if an email message exists in the user's mailbox.
+
+        Parameters:
+            message_id (str): The ID of the message to be checked.
+
+        Returns:
+            bool: True if the message exists, False otherwise.
+        """
+        # Constructing the URL for the Microsoft Graph API message endpoint
+        message_url = f'https://graph.microsoft.com/v1.0/users/{self.user_id}/messages/{message_id}/'
+
+        # Setting up the authorization header with the access token
+        headers = {'Authorization': f'Bearer {self.access_token}'}
+
+        try:
+            # Making a GET request to the Graph API
+            response = requests.get(message_url, headers=headers)
+
+            # If the status code is 200, the message exists
+            if response.status_code == 200:
+                #print("Message exists.")
+                return True
+            else:
+                #print(f"Message does not exist. Status code: {response.status_code}")
+                return False
+        except Exception as e:
+            # Log any exceptions
+            #print(f"An error occurred: {e}")
+            raise Exception(f"Failed to check for message existance. Error: {e}") from None
     
