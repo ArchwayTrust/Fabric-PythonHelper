@@ -153,49 +153,57 @@ class Emails:
             print(f"Authentication failed. Result was: {result}")
             raise Exception(f"Authentication failed. Error: {result}")
 
-    def search_message_by_subject_and_sender(self, subject, sender_email, only_search_inbox=True):
+    def search_message_by_subject_and_sender(self, subject, sender_email, only_search_inbox=True, only_return_latest=True):
         """
-        Searches for an email by its subject and sender's email using Microsoft Graph API.
+        Searches for an email by its subject and sender's email using Microsoft Graph API with pagination.
 
-        This method queries the Microsoft Graph API to find an email that matches
-        the given subject and sender's email address. It returns the ID of the first
-        matching email if found.
+        This method queries the Microsoft Graph API to find all emails that match
+        the given subject and sender's email address, handling pagination to gather all results.
 
         Parameters:
             subject (str): The subject of the email to search for.
             sender_email (str): The email address of the sender of the email.
             only_search_inbox (bool): Defaults to True. Limits search to only the main inbox.
+            only_return_latest (bool): Defaults to True. If True, returns the ID of the latest message.
 
         Returns:
-            str: The ID of the first email that matches the search criteria, or None if no match is found.
+            str or list: The ID of the latest email or a list of emails that match the search criteria.
+                            Returns None if no match is found.
         """
-        # Setting up the authorization header with the access token
         headers = {'Authorization': f'Bearer {self.access_token}'}
-
-        # The endpoint URL for Microsoft Graph API to access user's messages
         if only_search_inbox:
-            endpoint = f"https://graph.microsoft.com/v1.0/users/{self.user_id}/mailFolders/Inbox/messages"
+            endpoint = f"https://graph.microsoft.com/v1.0/users/{self.user_id}/mailFolders/Inbox/messages"  
         else:
             endpoint = f"https://graph.microsoft.com/v1.0/users/{self.user_id}/messages"
-
-        # Setting query parameters for filtering by subject and sender's email
+            
         query_parameters = {
             '$filter': f"subject eq '{subject}' and from/emailAddress/address eq '{sender_email}'",
-            '$select': 'id,subject,from'
+            '$select': 'id,subject,from,receivedDateTime,parentFolderId,hasAttachments'
         }
 
-        # Making a GET request to the Graph API
-        response = requests.get(endpoint, headers=headers, params=query_parameters)
+        messages = []
+        while endpoint:
+            response = requests.get(endpoint, headers=headers, params=query_parameters)
+            if response.status_code != 200:
+                # Handle unsuccessful API call
+                raise Exception(f"Error searching message by subject: {response.json()}")
 
-        # Checking the response status code
-        if response.status_code == 200:
-            # Parsing the response to get messages
-            messages = response.json().get('value', [])
-            # Return the ID of the first message found if messages are present
-            return messages[0]['id'] if messages else None
-        else:
-            # Raising an exception if the API call was unsuccessful
-            raise Exception(f"Error searching message by subject: {response.json()}")
+            data = response.json()
+            messages.extend(data.get('value', []))
+
+            # Update the endpoint for the next page, if any
+            endpoint = data.get('@odata.nextLink')
+            query_parameters = None  # Ensure subsequent requests do not repeat the initial query parameters
+
+        if messages:
+            sorted_messages = sorted(messages, key=lambda x: x['receivedDateTime'], reverse=True)
+
+            if only_return_latest:
+                return sorted_messages[0]['id']
+            else:
+                return sorted_messages
+
+        raise Exception("No matching messages found.")
         
     def get_attachment_ids_and_names(self, message_id):
         """
