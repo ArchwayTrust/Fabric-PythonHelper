@@ -164,6 +164,7 @@ class Emails:
         Parameters:
             subject (str): The subject of the email to search for.
             sender_email (str): The email address of the sender of the email.
+            only_search_inbox (bool): Defaults to True. Limits search to only the main inbox.
 
         Returns:
             str: The ID of the first email that matches the search criteria, or None if no match is found.
