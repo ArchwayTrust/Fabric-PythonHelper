@@ -1,17 +1,18 @@
 from setuptools import setup, find_packages
+from fabric_python_helper import __version__, __author_email__, __author__, __description__, __url__
 
 setup(
     name='fabric_python_helper',
-    version='0.2.6',
+    version=__version__,
     packages=find_packages(),
     install_requires=[
         "msal",
         "requests"
     ],
-    author='Ben Dobbs',
-    author_email='bdobbs@archwaytrust.co.uk',
-    description='Collection of useful python code for automation in Microsoft Fabric.',
+    author=__author__,
+    author_email=__author_email__,
+    description=__description__,
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/ArchwayTrust/Fabric-PythonHelper'
+    url=__url__
 )
