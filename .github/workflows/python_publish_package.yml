@@ -40,8 +40,10 @@ jobs:
           curl \
             -X POST \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/octet-stream" \
+            -H "Content-Type: $(file -b --mime-type "$file")" \
             -H "Accept: application/vnd.github.v3+json" \
-            --data-binary @$file \
-            "${{ github.event.release.upload_url }}?name=$(basename "$file")"
+            -F "name=$(basename "$file")" \
+            -F "label=$(basename "$file")" \
+            -F "file=@$file" \
+            "${{ github.event.release.upload_url }}"
         done
