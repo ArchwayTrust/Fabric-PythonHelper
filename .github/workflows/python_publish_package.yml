@@ -1,4 +1,4 @@
-name: Publish Python Package to PyPI
+name: Build, Publish, and Upload Release Assets
 
 on:
   release:
@@ -32,3 +32,15 @@ jobs:
       env:
         PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
       run: twine upload dist/* --skip-existing -u __token__ -p $PYPI_API_TOKEN
+
+    - name: Upload Release Assets
+      run: |
+        for file in dist/*; do
+          echo "Uploading ${file}"
+          curl \
+            -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: $(file -b --mime-type $file)" \
+            --data-binary @$file \
+            ${{ github.event.release.upload_url }}?name=$(basename $file)
+        done
