@@ -34,16 +34,7 @@ jobs:
       run: twine upload dist/* --skip-existing -u __token__ -p $PYPI_API_TOKEN
 
     - name: Upload Release Assets
-      run: |
-        for file in dist/*; do
-          echo "Uploading ${file}"
-          curl \
-            -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: $(file -b --mime-type "$file")" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -F "name=$(basename "$file")" \
-            -F "label=$(basename "$file")" \
-            -F "file=@$file" \
-            "${{ github.event.release.upload_url }}"
-        done
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        UPLOAD_URL: ${{ github.event.release.upload_url }}
+      run: python scripts/upload_assets.py
