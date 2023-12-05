@@ -6,5 +6,5 @@ from .pbi_admin import SemanticModels
 __version__="0.2.7"
 __author__="Ben Dobbs"
 __author_email__="bdobbs@archwaytrust.co.uk"
-__description__="Collection of useful python code for automation in Microsoft Fabric.",
-__url__='https://github.com/ArchwayTrust/Fabric-PythonHelper'
+__description__="Collection of useful python code for automation in Microsoft Fabric."
+__url__="https://github.com/ArchwayTrust/Fabric-PythonHelper"
