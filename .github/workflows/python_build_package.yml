@@ -1,12 +1,4 @@
-# This workflow will upload a Python Package using Twine when a release is created
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#publishing-to-package-registries
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Build Python Package
+name: Build and Update Python Package
 
 on:
   push:
@@ -14,27 +6,41 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   deploy:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
         python-version: '3.x'
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install build
+
+    - name: Clear dist directory
+      run: rm -rf dist/*
+
     - name: Build package
       run: python -m build
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: package
-        path: dist/
+
+    - name: Configure Git
+      run: |
+        git config --global user.name 'Your Name'
+        git config --global user.email 'your-email@example.com'
+
+    - name: Commit and push
+      run: |
+        git add dist/*
+        git commit -m "Update distribution files"
+        # This will push the changes to the main branch
+        git push
+
