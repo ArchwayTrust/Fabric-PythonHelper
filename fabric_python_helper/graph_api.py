@@ -283,7 +283,7 @@ class Emails:
         # Returning the attachment content based on its type
         return attachment_content if is_binary else attachment_content.decode(encoding)
 
-    def delete_email(self, message_id, max_retries=4):
+    def delete_email(self, message_id):
         """
         Deletes an email using the Microsoft Graph API.
 
@@ -295,7 +295,7 @@ class Emails:
             message_id (str): The ID of the message to be deleted.
 
         Returns:
-            bool: True if the email was successfully deleted, False otherwise.
+            bool: True if the email was successfully deleted. Raises an exception otherwise.
         """
 
         # Constructing the URL for the Microsoft Graph API delete message endpoint
@@ -307,29 +307,13 @@ class Emails:
             'Content-Type': 'application/json'
         }
 
-        for attempt in range(max_retries):
-            response = requests.delete(delete_url, headers=headers)
-            message_exists = self._check_if_message_exists(message_id)
-            
-            if not message_exists:
-                print("Email deleted successfully.")
-                return True
-            else:
-                print(f"Attempt {attempt+1} failed. Message still exists.") # range numbers from 0
-                
-                # Exponential backoff but never waits more than 2 minutes.
-                # Depending on retries: 10, 20, 40, 80, 120, 120, 120... 
-                exp_sleep_time = 10 * (2**attempt)
-                if exp_sleep_time > 80:
-                    sleep_time = 120
-                else:
-                    sleep_time = exp_sleep_time
-                print(f"Retrying delete in {sleep_time} seconds.")
-                                
-                time.sleep(sleep_time) 
-
-        print("Failed to delete email after maximum retries.")
-        return False
+        response = requests.delete(delete_url, headers=headers)
+        # Check if the request was successful
+        if response.status_code == 204:
+            print("Email deleted successfully.")
+            return True
+        else:
+            raise Exception(f"Failed to delete email. Status code: {response.status_code}, Response: {response.text}")
     
     def get_user(self):
         """
