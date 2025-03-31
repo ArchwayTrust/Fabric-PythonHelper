@@ -37,7 +37,7 @@ semantic_model.refresh_semantic_model(expected_duration=60, loop_interval=20, wa
 
 
 ## GraphAPI
-Requires an app registration with delegated User.Read, Mail.ReadWrite, Mail.Send and offline_access scopes. The public client flow must also be enabled.
+Requires an app registration with delegated User.Read, Mail.ReadWrite, Mail.ReadWrite.Shared, Mail.Send and offline_access scopes. The public client flow must also be enabled.
 Requires an azure key vault which the notebook owner has permissions to update and read secrets on.
 
 In Fabric notebook run:

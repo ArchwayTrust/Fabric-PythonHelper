@@ -8,7 +8,7 @@ from notebookutils import mssparkutils
 class Emails:
     """
     A class to interact with Microsoft Graph API for managing emails.
-    Requires an app registration with delegated User.Read, Mail.ReadWrite, offline_access and public client flow enabled.
+    Requires an app registration with delegated User.Read, Mail.ReadWrite, Mail.ReadWrite.Shared, offline_access and public client flow enabled.
 
     Attributes:
         tennant_id (str): Tenant ID for Azure authentication.
