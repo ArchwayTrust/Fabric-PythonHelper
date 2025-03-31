@@ -153,7 +153,7 @@ class Emails:
             print(f"Authentication failed. Result was: {result}")
             raise Exception(f"Authentication failed. Error: {result}")
 
-    def search_message_by_subject_and_sender(self, subject, sender_email, only_search_inbox=True, only_return_latest=True):
+    def search_message_by_subject_and_sender(self, subject, sender_email, only_search_inbox=True, only_return_latest=True, shared_mailbox_email=None):
         """
         Searches for an email by its subject and sender's email using Microsoft Graph API with pagination.
 
@@ -165,17 +165,22 @@ class Emails:
             sender_email (str): The email address of the sender of the email.
             only_search_inbox (bool): Defaults to True. Limits search to only the main inbox.
             only_return_latest (bool): Defaults to True. If True, returns the ID of the latest message.
+            shared_mailbox_email (str): Optional. The email address of the shared mailbox to search in.
 
         Returns:
             str or list: The ID of the latest email or a list of emails that match the search criteria.
-                            Returns None if no match is found.
+                         Returns None if no match is found.
         """
         headers = {'Authorization': f'Bearer {self.access_token}'}
+
+        # Determine the user ID or shared mailbox email to use in the endpoint
+        mailbox_id = shared_mailbox_email if shared_mailbox_email else self.user_id
+
         if only_search_inbox:
-            endpoint = f"https://graph.microsoft.com/v1.0/users/{self.user_id}/mailFolders/Inbox/messages"  
+            endpoint = f"https://graph.microsoft.com/v1.0/users/{mailbox_id}/mailFolders/Inbox/messages"
         else:
-            endpoint = f"https://graph.microsoft.com/v1.0/users/{self.user_id}/messages"
-            
+            endpoint = f"https://graph.microsoft.com/v1.0/users/{mailbox_id}/messages"
+
         query_parameters = {
             '$filter': f"subject eq '{subject}' and from/emailAddress/address eq '{sender_email}'",
             '$select': 'id,subject,from,receivedDateTime,parentFolderId,hasAttachments'
@@ -411,4 +416,4 @@ class Emails:
             # Log any exceptions
             #print(f"An error occurred: {e}")
             raise Exception(f"Failed to check for message existance. Error: {e}") from None
-    
+
