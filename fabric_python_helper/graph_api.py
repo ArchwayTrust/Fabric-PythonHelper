@@ -210,7 +210,7 @@ class Emails:
 
         raise Exception("No matching messages found.")
         
-    def get_attachment_ids_and_names(self, message_id):
+    def get_attachment_ids_and_names(self, message_id, shared_mailbox_email=None):
         """
         Retrieves a list of attachment IDs and names for a specified email message.
 
@@ -220,12 +220,16 @@ class Emails:
 
         Parameters:
             message_id (str): The ID of the email message whose attachments are to be retrieved.
+            shared_mailbox_email (str): Optional. The email address of the shared mailbox to retrieve attachments from.
 
         Returns:
             list of tuple: A list of tuples, where each tuple contains the ID and name of an attachment.
         """
+        # Determine the user ID or shared mailbox email to use in the endpoint
+        mailbox_id = shared_mailbox_email if shared_mailbox_email else self.user_id
+
         # Constructing the URL for the Microsoft Graph API attachments endpoint
-        url = f'https://graph.microsoft.com/v1.0/users/{self.user_id}/messages/{message_id}/attachments'
+        url = f'https://graph.microsoft.com/v1.0/users/{mailbox_id}/messages/{message_id}/attachments'
 
         # Setting up the authorization header with the access token
         headers = {
@@ -255,7 +259,7 @@ class Emails:
 
         return attachments_info
     
-    def download_attachment(self, message_id, attachment_id, is_binary=False, encoding='utf-8'):
+    def download_attachment(self, message_id, attachment_id, is_binary=False, encoding='utf-8', shared_mailbox_email=None):
         """
         Downloads an attachment from an email using the Microsoft Graph API.
 
@@ -267,17 +271,21 @@ class Emails:
             attachment_id (str): The ID of the attachment to be downloaded.
             is_binary (bool): Flag indicating whether the attachment is a binary file. Default is False.
             encoding (str): The encoding used to decode the attachment's content. Ignored if is_binary is True. Default is 'utf-8'.
+            shared_mailbox_email (str): Optional. The email address of the shared mailbox to retrieve the attachment from.
 
         Returns:
             bytes or str: The content of the attachment, either as a byte string (for binary files) or a decoded string (for text files).
         """
+        # Determine the user ID or shared mailbox email to use in the endpoint
+        mailbox_id = shared_mailbox_email if shared_mailbox_email else self.user_id
+
+        # Constructing the URL to access the attachment via Microsoft Graph API
+        attachment_url = f'https://graph.microsoft.com/v1.0/users/{mailbox_id}/messages/{message_id}/attachments/{attachment_id}'
+
         # Setting up the authorization header with the access token
         headers = {'Authorization': f'Bearer {self.access_token}'}
 
-        # Constructing the URL to access the attachment via Microsoft Graph API
-        attachment_url = f'https://graph.microsoft.com/v1.0/users/{self.user_id}/messages/{message_id}/attachments/{attachment_id}'
-
-        # Making a GET request to fetch the attachment anf check success
+        # Making a GET request to fetch the attachment and check success
         attachment_response = requests.get(attachment_url, headers=headers)
         attachment_response.raise_for_status()
 
@@ -288,23 +296,26 @@ class Emails:
         # Returning the attachment content based on its type
         return attachment_content if is_binary else attachment_content.decode(encoding)
 
-    def delete_email(self, message_id):
+    def delete_email(self, message_id, shared_mailbox_email=None):
         """
         Deletes an email using the Microsoft Graph API.
 
         This method sends a DELETE request to the Microsoft Graph API to remove an
-        email message from a user's mailbox. It uses the user's ID and the message's
-        ID to identify the specific email to be deleted.
+        email message from a user's mailbox or a shared mailbox. It uses the user's ID
+        or the shared mailbox email and the message's ID to identify the specific email to be deleted.
 
         Parameters:
             message_id (str): The ID of the message to be deleted.
+            shared_mailbox_email (str): Optional. The email address of the shared mailbox to delete the email from.
 
         Returns:
             bool: True if the email was successfully deleted. Raises an exception otherwise.
         """
+        # Determine the user ID or shared mailbox email to use in the endpoint
+        mailbox_id = shared_mailbox_email if shared_mailbox_email else self.user_id
 
         # Constructing the URL for the Microsoft Graph API delete message endpoint
-        delete_url = f'https://graph.microsoft.com/v1.0/users/{self.user_id}/messages/{message_id}'
+        delete_url = f'https://graph.microsoft.com/v1.0/users/{mailbox_id}/messages/{message_id}'
 
         # Setting up the authorization header with the access token
         headers = {
@@ -312,7 +323,9 @@ class Emails:
             'Content-Type': 'application/json'
         }
 
+        # Sending the DELETE request
         response = requests.delete(delete_url, headers=headers)
+
         # Check if the request was successful
         if response.status_code == 204:
             print("Email deleted successfully.")
@@ -385,18 +398,22 @@ class Emails:
             print(f"Failed to send email. Status code: {response.status_code}")
             raise Exception(f"Failed to send email. Status code: {response.status_code}")
     
-    def _check_if_message_exists(self, message_id):
+    def _check_if_message_exists(self, message_id, shared_mailbox_email=None):
         """
-        Checks if an email message exists in the user's mailbox.
+        Checks if an email message exists in the user's mailbox or a shared mailbox.
 
         Parameters:
             message_id (str): The ID of the message to be checked.
+            shared_mailbox_email (str): Optional. The email address of the shared mailbox to check the message in.
 
         Returns:
             bool: True if the message exists, False otherwise.
         """
+        # Determine the user ID or shared mailbox email to use in the endpoint
+        mailbox_id = shared_mailbox_email if shared_mailbox_email else self.user_id
+
         # Constructing the URL for the Microsoft Graph API message endpoint
-        message_url = f'https://graph.microsoft.com/v1.0/users/{self.user_id}/messages/{message_id}/'
+        message_url = f'https://graph.microsoft.com/v1.0/users/{mailbox_id}/messages/{message_id}/'
 
         # Setting up the authorization header with the access token
         headers = {'Authorization': f'Bearer {self.access_token}'}
@@ -407,13 +424,10 @@ class Emails:
 
             # If the status code is 200, the message exists
             if response.status_code == 200:
-                #print("Message exists.")
                 return True
             else:
-                #print(f"Message does not exist. Status code: {response.status_code}")
                 return False
         except Exception as e:
             # Log any exceptions
-            #print(f"An error occurred: {e}")
-            raise Exception(f"Failed to check for message existance. Error: {e}") from None
+            raise Exception(f"Failed to check for message existence. Error: {e}") from None
 
